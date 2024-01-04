@@ -64,8 +64,6 @@ docker run -d --restart unless-stopped --network host \
     grafana/grafana
 
 docker ps -l
-
-
 ```
 
 ### node-exporter setup | run-node-exporter.sh
@@ -92,6 +90,7 @@ docker run -d --restart unless-stopped --network host \
 
 docker ps -l
 
+
 ```
 
 ### Prometheus setup | run-prometheus.sh
@@ -102,6 +101,7 @@ name=$1
 default_value="demo"
 name=${name:-$default_value}
 prometheus_name=${name}-prometheus
+mkdir -p ${PWD}/$prometheus_name
 cat <<EOF >${PWD}/$prometheus_name/prometheus.yml
 global:
   scrape_interval: 15s
@@ -122,16 +122,15 @@ scrape_configs:
           - localhost:9100
 EOF
 
-
 prometheus_host_port=9090
 docker volume create prometheus-data
 mkdir -p ${prometheus_name}
 docker rm ${prometheus_name} -f
 docker run -d --restart unless-stopped --network host \
-    --name=${prometheus_name} \
-    -v ${PWD}/$prometheus_name/:/etc/prometheus/ \
-    -v prometheus-data:/prometheus \
-    prom/prometheus
+  --name=${prometheus_name} \
+  -v ${PWD}/$prometheus_name/:/etc/prometheus/ \
+  -v prometheus-data:/prometheus \
+  prom/prometheus
 docker ps -l
 
 ```
@@ -139,29 +138,18 @@ docker ps -l
 ### Install vmagent | run-vmagent.sh
 
 ```bash
-name=$1
-default_value="demo"
-name=${name:-$default_value}
-vmagent_name=${name}-vmagent
-vmagent_host_port=8429
-mkdir -p ${PWD}/$vmagent_name
-
-remoteWrite_url="https://localhost:8428/api/v1/write"
-cd
-cat <<EOF >Dockerfile
+#!/bin/bash
+remoteWrite_url="http://localhost:8428/api/v1/write"
+cat <<EOF >${PWD}/$vmagent_name/Dockerfile
 FROM victoriametrics/vmagent
 ENTRYPOINT ["/vmagent-prod"]
-CMD ["-remoteWrite.url=$remoteWrite_url"]
+CMD ["-remoteWrite.url=$remoteWrite_url" , "-remoteWrite.forceVMProto","-promscrape.config=/etc/prometheus/prometheus.yml"]
 EOF
 
-docker build -t victoriametrics/vmagent:$vmagent_name .
-rm -rf Dockerfile
+docker build -t victoriametrics/vmagent:$vmagent_name ${PWD}/$vmagent_name/
+rm -rf ${PWD}/$vmagent_name/Dockerfile
 
 cat <<EOF >${PWD}/$vmagent_name/prometheus.yml
-global:
-  scrape_interval: 15s
-  scrape_timeout: 10s
-  evaluation_interval: 15s
 scrape_configs:
   - job_name: prometheus
     metrics_path: /metrics
@@ -183,12 +171,11 @@ docker rm ${vmagent_name} -f
 
 docker run -d --restart unless-stopped --network host \
   --name=${vmagent_name} \
-  -v ${PWD}/$vmagent_name/:/etc/prometheus/ \
+  -v ${PWD}/$vmagent_name:/etc/prometheus/ \
   -v vmagentdata:/vmagentdata \
   victoriametrics/vmagent:$vmagent_name
 
 docker ps -l
-
 ```
 
 ### Install victoria-metrics | run-victoria-metrics.sh
@@ -207,31 +194,46 @@ docker rm ${victoria_metrics_name} -f
 docker run -d --restart unless-stopped --network host \
     --name=${victoria_metrics_name} \
     -v victoria-metrics-data:/victoria-metrics-data \
-    -v ${PWD}/${victoria_metrics_name}/provisioning:/etc/grafana/provisioning \
     victoriametrics/victoria-metrics
 
 docker ps -l
+
 
 ```
 
 ### Install the moitoring stack | install.sh
 
 ```bash
-#! /bin/bash
 
 name=$1
 default_value="demo"
 name=${name:-$default_value}
 
-source run-alertmanager.sh $name
-source run-prometheus.sh $name
-source run-node-exporter.sh $name
-source run-grafana.sh $name
-source run-vmagent.sh $name
-source run-victoria-metrics.sh $name
+echo run-alertmanager.sh $name
+source run-alertmanager.sh $name 1>/dev/null
+echo "---"
+
+echo run-prometheus.sh $name
+source run-prometheus.sh $name 1>/dev/null
+echo "---"
+
+echo run-node-exporter.sh $name
+source run-node-exporter.sh $name 1>/dev/null
+echo "---"
+
+echo run-victoria-metrics.sh $name
+source run-victoria-metrics.sh $name 1>/dev/null
+echo "---"
+
+echo run-vmagent.sh $name
+source run-vmagent.sh $name 1>/dev/null
+echo "---"
+
+echo run-grafana.sh $name
+source run-grafana.sh $name 1>/dev/null
+echo "---"
 
 docker ps | grep -E "STATUS|$name"
-
 
 ```
 
@@ -244,6 +246,34 @@ default_value="demo"
 name=${name:-$default_value}
 
 docker ps | grep $name | awk '{print $1}' | xargs docker rm -f
+
+```
+
+### Test the vmbackup and vmrestore
+
+### Backup
+
+```bash
+cat<<EOF>/etc/credentials
+[default]
+aws_access_key_id=ROOTNAME
+aws_secret_access_key=CHANGEME123
+EOF
+
+docker run  -v victoria-metrics-data:/victoria-metrics-data --network host victoriametrics/vmbackup -storageDataPath=/victoria-metrics-data -snapshot.createURL=http://localhost:8428/snapshot/create    -dst=s3://localhost:9000/data -credsFilePath=/etc/credentials -customS3Endpoint=http://localhost:9000
+
+```
+
+### Restore
+
+```bash
+cat<<EOF>/etc/credentials
+[default]
+aws_access_key_id=ROOTNAME
+aws_secret_access_key=CHANGEME123
+EOF
+
+docker run  -v victoria-metrics-data:/victoria-metrics-data --network host victoriametrics/vmrestore -storageDataPath=/victoria-metrics-data -snapshot.createURL=http://localhost:8428/snapshot/create    -src=s3://localhost:9000/data -credsFilePath=/etc/credentials -customS3Endpoint=http://localhost:9000
 
 ```
 
