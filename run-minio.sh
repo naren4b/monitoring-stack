@@ -29,3 +29,5 @@ mc alias set $S3_ALIAS $S3_ENDPOINT $ACCESS_KEY $SECRET_KEY --api "s3v4" --path 
 
 mc --insecure rm -r --force $S3_ALIAS/$BUCKET_NAME
 mc --insecure mb $BUCKET_NAME
+
+#rf: https://github.com/minio/minio/issues/4769#issuecomment-320319655
