@@ -1,0 +1,2 @@
+docker run -it --network host victoriametrics/vmbackup
+./vmbackup -storageDataPath=</path/to/victoria-metrics-data> -snapshot.createURL=http://localhost:8428/snapshot/create -dst=gs://<bucket>/<path/to/new/backup>

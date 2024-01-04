@@ -3,6 +3,7 @@ name=$1
 default_value="demo"
 name=${name:-$default_value}
 prometheus_name=${name}-prometheus
+mkdir -p ${PWD}/$prometheus_name
 cat <<EOF >${PWD}/$prometheus_name/prometheus.yml
 global:
   scrape_interval: 15s
@@ -23,14 +24,13 @@ scrape_configs:
           - localhost:9100
 EOF
 
-
 prometheus_host_port=9090
 docker volume create prometheus-data
 mkdir -p ${prometheus_name}
 docker rm ${prometheus_name} -f
 docker run -d --restart unless-stopped --network host \
-    --name=${prometheus_name} \
-    -v ${PWD}/$prometheus_name/:/etc/prometheus/ \
-    -v prometheus-data:/prometheus \
-    prom/prometheus
+  --name=${prometheus_name} \
+  -v ${PWD}/$prometheus_name/:/etc/prometheus/ \
+  -v prometheus-data:/prometheus \
+  prom/prometheus
 docker ps -l
