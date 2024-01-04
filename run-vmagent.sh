@@ -7,14 +7,14 @@ mkdir -p ${PWD}/$vmagent_name
 
 remoteWrite_url="https://localhost:8428/api/v1/write"
 cd
-cat <<EOF >Dockerfile
+cat <<EOF >${PWD}/$vmagent_name/Dockerfile
 FROM victoriametrics/vmagent
 ENTRYPOINT ["/vmagent-prod"]
 CMD ["-remoteWrite.url=$remoteWrite_url"]
 EOF
 
 docker build -t victoriametrics/vmagent:$vmagent_name .
-rm -rf Dockerfile
+rm -rf ${PWD}/$vmagent_name/Dockerfile
 
 cat <<EOF >${PWD}/$vmagent_name/prometheus.yml
 global:
