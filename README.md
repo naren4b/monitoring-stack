@@ -260,6 +260,8 @@ docker ps | grep $name | awk '{print $1}' | xargs docker rm -f
 
 ### Test the vmbackup and vmrestore
 
+![vmbackup-and-vmrestore](./vmc-backup-restore.jpg)
+
 ### Run minio for local:S3 | run-minio.sh
 
 ```bash
