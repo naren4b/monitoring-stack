@@ -1,4 +1,8 @@
-docker run -it --network host victoriametrics/vmbackup -storageDataPath=/victoria-metrics-data -snapshot.createURL=http://localhost:8428/snapshot/create    -dst=s3://localhost:9000/data -credsFilePath=/etc/credentials -customS3Endpoint=http://localhost:9000
+#!/bin/bash
+cat <<EOF >/etc/credentials
+[default]
+aws_access_key_id=ROOTNAME
+aws_secret_access_key=CHANGEME123
+EOF
 
-
- ./vmrestore-prod -src=fs:///tmp/data 
+docker run -v victoria-metrics-data:/victoria-metrics-data --network host victoriametrics/vmbackup -storageDataPath=/victoria-metrics-data -snapshot.createURL=http://localhost:8428/snapshot/create -dst=s3://localhost:9000/data -credsFilePath=/etc/credentials -customS3Endpoint=http://localhost:9000

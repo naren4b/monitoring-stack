@@ -1,4 +1,10 @@
-#!/bin/bash
+#! /bin/bash
+name=$1
+default_value="demo"
+name=${name:-$default_value}
+vmagent_name=${name}-vmagent
+mkdir -p ${PWD}/$vmagent_name
+
 remoteWrite_url="http://localhost:8428/api/v1/write"
 cat <<EOF >${PWD}/$vmagent_name/Dockerfile
 FROM victoriametrics/vmagent
