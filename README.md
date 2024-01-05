@@ -1,6 +1,6 @@
 # Setting up Monitoring Stack in a Node (docker container)
 
-![misc-Monitoring-Stack](https://github.com/naren4b/nks/assets/3488520/bf901652-f83b-4a27-9ecf-39b82d96ea06)
+![misc-Monitoring-Stack](./misc-Monitoring-Stack.jpg)
 
 ### AlertManager Setup | run-alertmanager.sh
 
@@ -249,7 +249,7 @@ docker ps | grep $name | awk '{print $1}' | xargs docker rm -f
 
 ```
 
-![image](https://github.com/naren4b/nks/assets/3488520/42d31709-ef8b-4289-b9d3-7eaef8775f63)
+![image](./runtime.JPG)
 
 ### Test the vmbackup and vmrestore
 
