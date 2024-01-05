@@ -1,6 +1,6 @@
 # Setting up Monitoring Stack in a Node (docker container)
 
-![misc-Monitoring-Stack](./misc-Monitoring-Stack.jpg)
+![misc-Monitoring-Stack](./monitoring-stack.gif)
 
 ### AlertManager Setup | run-alertmanager.sh
 
