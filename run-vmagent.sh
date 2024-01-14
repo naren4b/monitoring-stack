@@ -6,9 +6,6 @@ vmagent_name=${name}-vmagent
 mkdir -p ${PWD}/$vmagent_name
 
 remoteWrite_url="http://localhost:8428/api/v1/write"
-docker build -t victoriametrics/vmagent:$vmagent_name ${PWD}/$vmagent_name/
-rm -rf ${PWD}/$vmagent_name/Dockerfile
-
 cat <<EOF > ${PWD}/$vmagent_name/relabel.yml
 - target_label: "node"
   replacement: "local"
