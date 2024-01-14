@@ -273,6 +273,7 @@ name=${name:-$default_value}
 docker ps | grep $name | awk '{print $1}' | xargs docker rm -f
 
 ```
+![image](https://github.com/naren4b/monitoring-stack/assets/3488520/a4db267f-3120-4901-9619-e1e733574d6e)
 
 ![image](https://github.com/naren4b/nks/assets/3488520/42d31709-ef8b-4289-b9d3-7eaef8775f63)
 
