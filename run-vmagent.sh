@@ -39,6 +39,6 @@ docker run -d --restart unless-stopped --network host \
   -v ${PWD}/$vmagent_name:/etc/prometheus/ \
   -v ${PWD}/vma:/opt/ \
   -v vmagentdata:/vmagentdata \
-  victoriametrics/vmagent -remoteWrite.url=$remoteWrite_url -remoteWrite.urlRelabelConfig=/etc/prometheus/relabel.yml -remoteWrite.forceVMProto -promscrape.config=/etc/prometheus/prometheus.yml -remoteWrite.tlsCAFile=/opt/ca.crt -remoteWrite.tlsCertFile=/opt/vmagent-client-tls.crt -remoteWrite.tlsKeyFile=/opt/vmagent-client-tls.key -remoteWrite.tlsInsecureSkipVerify=false
+  victoriametrics/vmagent -remoteWrite.url=$remoteWrite_url -remoteWrite.urlRelabelConfig=/etc/prometheus/relabel.yml -remoteWrite.forceVMProto -promscrape.config=/etc/prometheus/prometheus.yml 
 
 docker ps -l
