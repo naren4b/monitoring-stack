@@ -32,8 +32,7 @@ bash install.sh
 cd ..
 
 kubectl port-forward -n monitoring prometheus-kps-kube-prometheus-stack-prometheus-0 9090 --address 0.0.0.0 &>/dev/null &
-host_ip=$(hostname -i)
-echo open: https://{$host_ip}:9090
+
 
 
 cd bo/vma
@@ -54,18 +53,48 @@ bash setup.sh
 bash install.sh
 cd ../..
 
-k port-forward -n vmc svc/vmc-victoria-metrics-cluster-vmselect 8481 --address 0.0.0.0 &>/dev/null &
+kubectl port-forward -n vmc svc/vmc-victoria-metrics-cluster-vmselect 8481 --address 0.0.0.0 &>/dev/null &
 
 host_ip=$(hostname -i)
 echo open: https://{$host_ip}:8481/select/0/vmui/
 
 ```
 
-- Notes:
+#### Let's verify
 
-* If you are doing everything in single cluster for testing then ignore instaling ofc/ and vma/ again
+```bash
+k get ns monitoring  vmc vma
+k get pod -n monitoring
+k get pod -n vmc
+k get pod -n vma
+```
+
+#### AT Prometehus UI & AT VMUI :
+
+```bash
+host_ip=$(hostname -i)
+echo open: https://{$host_ip}:8481/select/0/vmui/
+echo open: https://{$host_ip}:9090
+```
+
+#### PROM Query Language :
+
+```bash
+    - `count(up) by (job)` # it should have 1 extra
+    - `count({rmrw="allowed"})`
+    - '{rmrw="allowed"}'
+    - '{__name__=~"up|node_cpu_seconds_total|node_memory_MemTotal_bytes|node_memory_MemAvailable_bytes|node_filesystem_free_bytes"}'
+    - '{__name__=~"container_cpu_usage_seconds_total|container_memory_usage_bytes|container_memory_working_set_bytes|container_network_receive_bytes_total|container_network_transmit_bytes_total|container_cpu_cfs_throttled_seconds_total"}'
+```
+
+- Notes:
+  - default OFC_NAME vma
 
 ### Ref:
 
 - [Demo Environment](https://killercoda.com/killer-shell-cks/scenario/container-namespaces-docker)
 - [monitoring-stack.git](https://github.com/naren4b/monitoring-stack/tree/main/ho-bo-monitoring)
+
+```
+
+```

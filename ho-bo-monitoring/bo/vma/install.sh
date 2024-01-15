@@ -1,4 +1,4 @@
-default_name="demo"
+default_name="vma"
 default_id="111"
 default_pincode="751003"
 
