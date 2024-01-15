@@ -1,0 +1,76 @@
+deployment:
+  enabled: false
+
+statefulset:
+  enabled: true
+  clusterMode: false
+
+image:
+  repository: victoriametrics/vmagent
+  tag: "" # rewrites Chart.AppVersion
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+remoteWriteUrls:
+  - http://vmc-victoria-metrics-cluster-vminsert.vmc:8480/insert/0/prometheus #TODO
+
+extraArgs:
+  envflag.enable: "true"
+  envflag.prefix: VM_
+  loggerFormat: json
+  remoteWrite.forceVMProto: true
+  remoteWrite.flushInterval: "30s"
+  remoteWrite.queues: "1"
+  remoteWrite.vmProtoCompressLevel: 20
+  remoteWrite.label: "bo_id=1,pincode=741003" #TODO
+  remoteWrite.tlsInsecureSkipVerify: "true"
+  # remoteWrite.maxBlockSize: "8388608"
+  # remoteWrite.tlsCAFile: "/etc/prometheus/certs/ca.crt"
+  # remoteWrite.tlsCertFile: "/etc/prometheus/certs/tls.crt"
+  # remoteWrite.tlsKeyFile: "/etc/prometheus/certs/tls.key"
+env: []
+extraLabels: {}
+
+# extraVolumes:
+# - name: relable-config
+#   configMap:
+#     name: relable-config
+# - name: metric-tls
+#   secret:
+#     secretName: metric-tls
+# extraVolumeMounts:
+# - name: relable-config
+#   mountPath: /etc/prometheus/relabel.yml
+#   subpath: relabel.yml
+# - name: metric-tls
+#   mountPath: /etc/prometheus/certs/
+
+serviceMonitor:
+  enabled: true
+  extraLabels: {}
+  annotations: {}
+  relabelings: []
+
+persistence:
+  enabled: true
+  # storageClassName: rook-block
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+
+config:
+  global:
+    scrape_interval: 10s
+  scrape_configs:
+    - job_name: "federate"
+      scrape_interval: 15s
+      honor_labels: true
+      metrics_path: "/federate"
+      params:
+        "match[]":
+          - '{rmrw="allowed"}'
+          - '{__name__=~"up|node_cpu_seconds_total|node_memory_MemTotal_bytes|node_memory_MemAvailable_bytes|node_filesystem_free_bytes"}'
+          - '{__name__=~"container_cpu_usage_seconds_total|container_memory_usage_bytes|container_memory_working_set_bytes|container_network_receive_bytes_total|container_network_transmit_bytes_total|container_cpu_cfs_throttled_seconds_total"}'
+      static_configs:
+        - targets:
+            - kps-kube-prometheus-stack-prometheus.monitoring:9090 #todo

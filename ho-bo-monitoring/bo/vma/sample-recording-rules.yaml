@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    release: kps #TODO
+  name: pod-recording-rules
+  namespace: monitoring
+spec:
+  groups:
+    - name: pod-recording-rules.rules
+      rules:
+        - expr: |
+            sum(kube_pod_status_phase) by (phase)
+          record: kube_pod_status_phase_sum
+          labels:
+            rmrw: allowed
+        - expr: |
+            prometheus_tsdb_head_series
+          record: prometheus_tsdb_head_series
+          labels:
+            rmrw: allowed
