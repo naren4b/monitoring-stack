@@ -18,7 +18,12 @@ Additionally, all branch offices have installed the "prometheus-community/kube-p
 
 ### Solution
 
-#### At BO-Cluster:\*
+```bash
+git clone https://github.com/naren4b/monitoring-stack.git
+cd  monitoring-stack/ho-bo-monitoring/
+```
+
+#### At Any Office-Cluster:\*
 
 ```bash
 cd ofc
@@ -26,30 +31,24 @@ bash setup.sh
 bash install.sh
 cd ..
 
+kubectl port-forward -n monitoring prometheus-kps-kube-prometheus-stack-prometheus-0 9090 --address 0.0.0.0 &>/dev/null &
+host_ip=$(hostname -i)
+echo open: https://{$host_ip}:9090
+
+
 cd bo/vma
 bash setup.sh
 bash install.sh $OFC_NAME $OFC_ID $OFC_PINCODE
 cd ../..
 
-k port-forward -n monitoring prometheus-kps-kube-prometheus-stack-prometheus-0 9090 --address 0.0.0.0 &>/dev/null &
-host_ip=$(hostname -i)
-echo open: https://{$host_ip}:9090
+
 
 ```
 
 #### AT HO-Cluster
 
 ```bash
-cd ofc
-bash setup.sh
-bash install.sh
-cd ..
-
-cd bo/vma
-bash setup.sh
-bash install.sh $OFC_NAME $OFC_ID $OFC_PINCODE
-cd ../..
-
+# Install the above Any Office-Cluster
 cd ho/vmc
 bash setup.sh
 bash install.sh
