@@ -25,4 +25,4 @@ echo helm upgrade --install $BO_NAME vm/victoria-metrics-agent \
   -f vmagent-values.yaml -f $BO_NAME-values.yaml \
   -n $BO_NAME --create-namespace
 
-k apply -f sample-recording-rules.yaml -n monitoring #TODO
+kubectl apply -f sample-recording-rules.yaml -n monitoring #TODO

@@ -21,10 +21,15 @@ Additionally, all branch offices have installed the "prometheus-community/kube-p
 #### At BO-Cluster:\*
 
 ```bash
-bash ofc/setup.sh
-bash ofc/install.sh
-bash vma/setup.sh
-bash vma/install.sh $OFC_NAME $OFC_ID $OFC_PINCODE
+cd ofc
+bash setup.sh
+bash install.sh
+cd ..
+
+cd bo/vma
+bash setup.sh
+bash install.sh $OFC_NAME $OFC_ID $OFC_PINCODE
+cd ../..
 
 k port-forward -n monitoring prometheus-kps-kube-prometheus-stack-prometheus-0 9090 --address 0.0.0.0 &>/dev/null &
 host_ip=$(hostname -i)
@@ -35,12 +40,20 @@ echo open: https://{$host_ip}:9090
 #### AT HO-Cluster
 
 ```bash
-bash ofc/setup.sh
-bash ofc/install.sh
-bash vma/setup.sh
-bash vma/install.sh $OFC_NAME $OFC_ID $OFC_PINCODE
-bash vmc/setup.sh
-bash vmc/install.sh
+cd ofc
+bash setup.sh
+bash install.sh
+cd ..
+
+cd bo/vma
+bash setup.sh
+bash install.sh $OFC_NAME $OFC_ID $OFC_PINCODE
+cd ../..
+
+cd ho/vmc
+bash setup.sh
+bash install.sh
+cd ../..
 
 k port-forward -n vmc svc/vmc-victoria-metrics-cluster-vmselect 8481 --address 0.0.0.0 &>/dev/null &
 
