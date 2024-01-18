@@ -21,6 +21,7 @@ Additionally, all branch offices have installed the "prometheus-community/kube-p
 ```bash
 git clone https://github.com/naren4b/monitoring-stack.git
 cd  monitoring-stack/ho-bo-monitoring/
+
 ```
 
 #### At Any Office-Cluster:\*
@@ -39,6 +40,7 @@ cd bo/vma
 bash setup.sh
 bash install.sh $OFC_NAME $OFC_ID $OFC_PINCODE
 cd ../..
+
 
 
 
