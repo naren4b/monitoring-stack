@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    meta.helm.sh/release-name: vma
+    meta.helm.sh/release-namespace: vma
+  creationTimestamp: "2024-01-18T08:51:03Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/instance: vma
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: victoria-metrics-agent
+    app.kubernetes.io/version: v1.96.0
+    helm.sh/chart: victoria-metrics-agent-0.9.16
+  name: vma-victoria-metrics-agent
+  namespace: vma
+  resourceVersion: "4476"
+  uid: 4f228ae4-84e8-4fb1-8397-ee2091dfb2b9
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: vma
+      app.kubernetes.io/name: victoria-metrics-agent
+  serviceName: vma-victoria-metrics-agent
+  template:
+    metadata:
+      annotations:
+        checksum/config: 99cd96eeb75a6049f4ad6cca9759a183539fc7d5282ad4df9978f7fd88da5b13
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: vma
+        app.kubernetes.io/name: victoria-metrics-agent
+    spec:
+      containers:
+      - args:
+        - -promscrape.config=/config/scrape.yml
+        - -remoteWrite.tmpDataPath=/tmpData
+        - -remoteWrite.url=http://vmc-victoria-metrics-cluster-vminsert.vmc:8480/insert/0/prometheus
+        - -envflag.enable=true
+        - -envflag.prefix=VM_
+        - -loggerFormat=json
+        - -remoteWrite.flushInterval=30s
+        - -remoteWrite.forceVMProto=true
+        - -remoteWrite.label=bo_id=111,pincode=751003
+        - -remoteWrite.queues=1
+        - -remoteWrite.tlsInsecureSkipVerify=true
+        - -remoteWrite.vmProtoCompressLevel=20
+        image: victoriametrics/vmagent:v1.96.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          successThreshold: 1
+          tcpSocket:
+            port: http
+          timeoutSeconds: 5
+        name: victoria-metrics-agent
+        ports:
+        - containerPort: 8429
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        securityContext: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmpData
+          name: tmpdata
+        - mountPath: /config
+          name: config
+        workingDir: /
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: vma-victoria-metrics-agent
+      serviceAccountName: vma-victoria-metrics-agent
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: vma-victoria-metrics-agent-config
+        name: config
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: tmpdata
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      volumeMode: Filesystem
+    status:
+      phase: Pending

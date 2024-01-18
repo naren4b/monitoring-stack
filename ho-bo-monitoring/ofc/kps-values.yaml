@@ -1888,7 +1888,13 @@ prometheus:
     #    medium: Memory
 
     # Additional volumes on the output StatefulSet definition.
-    volumes: []
+    volumes:
+      - name: tmpdata
+        persistentVolumeClaim:
+          claimName: tmpdata-vma
+      - configMap:
+        defaultMode: 420
+        name: vma-agent-config
 
     # Additional VolumeMounts on the output StatefulSet definition.
     volumeMounts: []
@@ -2057,7 +2063,27 @@ prometheus:
 
     ## Containers allows injecting additional containers. This is meant to allow adding an authentication proxy to a Prometheus pod.
     ## if using proxy extraContainer update targetPort with proxy container port
-    containers: []
+    containers:
+      - args:
+          - -promscrape.config=/config/scrape.yml
+          - -remoteWrite.tmpDataPath=/tmpData
+          - -remoteWrite.url=http://vmc-victoria-metrics-cluster-vminsert.vmc:8480/insert/0/prometheus
+          - -envflag.enable=true
+          - -envflag.prefix=VM_
+          - -loggerFormat=json
+          - -remoteWrite.flushInterval=30s
+          - -remoteWrite.forceVMProto=true
+          - -remoteWrite.label=bo_id=111,pincode=751003
+          - -remoteWrite.queues=1
+          - -remoteWrite.tlsInsecureSkipVerify=true
+          - -remoteWrite.vmProtoCompressLevel=20
+        image: victoriametrics/vmagent:v1.96.0
+        volumeMounts:
+          - mountPath: /tmpData
+            name: tmpdata
+          - mountPath: /config
+            name: config
+
     # containers:
     # - name: oauth-proxy
     #   image: quay.io/oauth2-proxy/oauth2-proxy:v7.5.1

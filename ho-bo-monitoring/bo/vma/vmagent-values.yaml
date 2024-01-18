@@ -13,6 +13,7 @@ image:
 imagePullSecrets: []
 remoteWriteUrls:
   - http://vmc-victoria-metrics-cluster-vminsert.vmc:8480/insert/0/prometheus #TODO
+  # - http://vms-victoria-metrics-single-server.vms.svc.cluster.local:8428/api/v1/write
 
 extraArgs:
   envflag.enable: "true"
