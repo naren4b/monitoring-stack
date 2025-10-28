@@ -1,4 +1,8 @@
+# docker run --rm -d --name="grafana" --network host grafana/grafana 
+
+
 podman build -t webserver:v1 .
+
 mkdir -p ./out
 podman stop webserver && podman rm webserver
 podman volume create webhook-alerts-data
